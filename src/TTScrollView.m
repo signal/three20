@@ -388,8 +388,11 @@ static const NSTimeInterval kOvershoot = 2;
       [self reloadData];
     }
 
-    _pageArrayIndex = [self arrayIndexForPageIndex:pageIndex relativeToIndex:_centerPageIndex];
-    _centerPageIndex = pageIndex;
+	  _pageArrayIndex = [self arrayIndexForPageIndex:pageIndex relativeToIndex:_centerPageIndex];
+	  if (pageIndex != _centerPageIndex) {
+		  _centerPageIndex = pageIndex;
+		  [self setNeedsLayout];
+	  }
   }
 }
 
