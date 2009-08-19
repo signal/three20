@@ -39,7 +39,7 @@
 
 @implementation TTTableLinkedItem
 
-@synthesize URL = _URL, accessoryURL = _accessoryURL;
+@synthesize URL = _URL, accessoryURL = _accessoryURL, query = _query;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // NSObject
@@ -54,6 +54,7 @@
 
 - (void)dealloc {
   TT_RELEASE_SAFELY(_URL);
+  TT_RELEASE_SAFELY(_query);
   TT_RELEASE_SAFELY(_accessoryURL);
   [super dealloc];
 }
@@ -99,6 +100,14 @@
   TTTableTextItem* item = [[[self alloc] init] autorelease];
   item.text = text;
   item.URL = URL;
+  return item;
+}
+
++ (id)itemWithText:(NSString*)text URL:(NSString*)URL query:(NSDictionary*) query {
+  TTTableTextItem* item = [[[self alloc] init] autorelease];
+  item.text = text;
+  item.URL = URL;
+  item.query = query;
   return item;
 }
 
