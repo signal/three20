@@ -1,4 +1,5 @@
 #import "Three20/TTStyleSheet.h"
+#import "Three20/TTActivityLabel.h"
 
 @class TTShape;
 
@@ -60,6 +61,8 @@
 @property(nonatomic,readonly) UIFont* activityBannerFont;
 
 @property(nonatomic,readonly) UITableViewCellSelectionStyle tableSelectionStyle;
+
+@property(nonatomic,readonly) TTActivityLabelStyle activityLabelStyle;
 
 - (TTStyle*)selectionFillStyle:(TTStyle*)next;
 

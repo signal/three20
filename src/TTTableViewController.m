@@ -305,7 +305,7 @@ static const CGFloat kBannerViewHeight = 22;
                         ? [_dataSource titleForLoading:NO]
                         : [self defaultTitleForLoading];
       if (title.length) {
-        TTActivityLabel* label = [[[TTActivityLabel alloc] initWithStyle:TTActivityLabelStyleWhiteBox]
+        TTActivityLabel* label = [[[TTActivityLabel alloc] initWithStyle:TTSTYLEVAR(activityLabelStyle)]
                                     autorelease];
         label.text = title;
         label.backgroundColor = _tableView.backgroundColor;
@@ -505,6 +505,7 @@ static const CGFloat kBannerViewHeight = 22;
       _tableBannerView.frame = [self rectForBannerView];
       _tableBannerView.userInteractionEnabled = NO;
       [self addToOverlayView:_tableBannerView];
+      _tableBannerView.frame = [self rectForBannerView];
 
       if (animated) {
         _tableBannerView.top += kBannerViewHeight;

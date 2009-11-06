@@ -375,12 +375,12 @@ static const NSTimeInterval kOvershoot = 2;
     } else {
       [self reloadData];
     }
-
 	  _pageArrayIndex = [self arrayIndexForPageIndex:pageIndex relativeToIndex:_centerPageIndex];
-	  if (pageIndex != _centerPageIndex) {
-		  _centerPageIndex = pageIndex;
-		  [self setNeedsLayout];
-	  }
+
+    if (pageIndex != _centerPageIndex) {
+      _centerPageIndex = pageIndex;
+      [self setNeedsLayout];
+    }
   }
 }
 
@@ -682,21 +682,21 @@ static const NSTimeInterval kOvershoot = 2;
 
 - (void)acquireTouch:(UITouch*)touch {
   if (!_touch1) {
-    _touch1 = touch;
+    _touch1 = [touch retain];
     ++_touchCount;
   } else if (!_touch2) {
-    _touch2 = touch;
+    _touch2 = [touch retain];
     ++_touchCount;
   }
 }
 
 - (UITouch*)removeTouch:(UITouch*)touch {
   if (touch == _touch1) {
-    _touch1 = nil;
+    TT_RELEASE_SAFELY(_touch1);
     --_touchCount;
     return _touch2;
   } else if (touch == _touch2) {
-    _touch2 = nil;
+    TT_RELEASE_SAFELY(_touch2);
     --_touchCount;
     return _touch1;
   } else {
@@ -1172,8 +1172,8 @@ static const NSTimeInterval kOvershoot = 2;
   [self stopAnimation:YES];
   [self stopDragging:NO];
   [self updateZooming:UIEdgeInsetsZero];
-  _touch1 = nil;
-  _touch2 = nil;
+  TT_RELEASE_SAFELY(_touch1);
+  TT_RELEASE_SAFELY(_touch2);
   _touchCount = 0;
 }
 

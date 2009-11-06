@@ -724,6 +724,10 @@
   return UITableViewCellSelectionStyleBlue;
 }
 
+- (TTActivityLabelStyle)activityLabelStyle {
+  return TTActivityLabelStyleWhiteBox;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // private
 
