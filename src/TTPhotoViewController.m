@@ -2,6 +2,7 @@
 #import "Three20/TTURLCache.h"
 #import "Three20/TTURLRequest.h"
 #import "Three20/TTPhotoView.h"
+#import "Three20/TTActivityLabel.h"
 #import "Three20/TTNavigator.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -10,6 +11,7 @@
 static const NSTimeInterval kPhotoLoadLongDelay = 0.5;
 static const NSTimeInterval kPhotoLoadShortDelay = 0.25;
 static const NSTimeInterval kSlideshowInterval = 2;
+static const NSInteger kActivityLabelTag = 96;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,6 +86,15 @@ static const NSTimeInterval kSlideshowInterval = 2;
   playButton.enabled = _photoSource.numberOfPhotos > 1;
   _previousButton.enabled = _centerPhotoIndex > 0;
   _nextButton.enabled = _centerPhotoIndex >= 0 && _centerPhotoIndex < _photoSource.numberOfPhotos-1;
+}
+
+- (void)updateToolbarWithOrientation:(UIInterfaceOrientation)interfaceOrientation {
+  if (UIInterfaceOrientationIsPortrait(interfaceOrientation)) {
+    _toolbar.height = TT_TOOLBAR_HEIGHT;
+  } else {
+    _toolbar.height = TT_LANDSCAPE_TOOLBAR_HEIGHT+1;
+  }
+  _toolbar.top = self.view.height - _toolbar.height;
 }
 
 - (void)updatePhotoView {
@@ -337,12 +348,14 @@ static const NSTimeInterval kSlideshowInterval = 2;
   CGRect innerFrame = CGRectMake(0, 0,
                                  screenFrame.size.width, screenFrame.size.height);
   _innerView = [[UIView alloc] initWithFrame:innerFrame];
+  _innerView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
   [self.view addSubview:_innerView];
   
   _scrollView = [[TTScrollView alloc] initWithFrame:screenFrame];
   _scrollView.delegate = self;
   _scrollView.dataSource = self;
   _scrollView.backgroundColor = [UIColor blackColor];
+  _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
   [_innerView addSubview:_scrollView];
   
   _nextButton = [[UIBarButtonItem alloc] initWithImage:
@@ -363,10 +376,9 @@ static const NSTimeInterval kSlideshowInterval = 2;
     CGRectMake(0, screenFrame.size.height - TT_ROW_HEIGHT,
                screenFrame.size.width, TT_ROW_HEIGHT)];
   _toolbar.barStyle = self.navigationBarStyle;
-  _toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth
-                              | UIViewAutoresizingFlexibleTopMargin;
+  _toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin;
   _toolbar.items = [NSArray arrayWithObjects:
-    space, _previousButton, space, _nextButton, space, nil];
+                   space, _previousButton, space, _nextButton, space, nil];
   [_innerView addSubview:_toolbar];    
 }
 
@@ -382,6 +394,11 @@ static const NSTimeInterval kSlideshowInterval = 2;
   TT_RELEASE_SAFELY(_toolbar);
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  [self updateToolbarWithOrientation:self.interfaceOrientation];
+}
+
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
 
@@ -390,6 +407,20 @@ static const NSTimeInterval kSlideshowInterval = 2;
   if (self.nextViewController) {
     [self showBars:YES animated:NO];
   }
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+  return TTIsSupportedOrientation(interfaceOrientation);
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+        duration:(NSTimeInterval)duration {
+  [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+  [self updateToolbarWithOrientation:toInterfaceOrientation];
+}
+
+- (UIView *)rotatingFooterView {
+  return _toolbar;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -523,6 +554,7 @@ static const NSTimeInterval kSlideshowInterval = 2;
 
 - (void)model:(id<TTModel>)model didDeleteObject:(id)object atIndexPath:(NSIndexPath*)indexPath {
   if (object == self.centerPhoto) {
+    [self showActivity:nil];
     [self moveToNextValidPhoto];
     [_scrollView reloadData];
     [self refresh];
@@ -656,6 +688,26 @@ static const NSTimeInterval kSlideshowInterval = 2;
 }
 
 - (void)didMoveToPhoto:(id<TTPhoto>)photo fromPhoto:(id<TTPhoto>)fromPhoto {
+}
+
+- (void)showActivity:(NSString*)title {
+  if (title) {
+    TTActivityLabel* label = [[[TTActivityLabel alloc]
+                             initWithStyle:TTActivityLabelStyleBlackBezel] autorelease];
+    label.tag = kActivityLabelTag;
+    label.text = title;
+    label.frame = _scrollView.frame;
+    [_innerView addSubview:label];
+
+    _scrollView.scrollEnabled = NO;
+  } else {
+    UIView* label = [_innerView viewWithTag:kActivityLabelTag];
+    if (label) {
+      [label removeFromSuperview];
+    }
+
+    _scrollView.scrollEnabled = YES;
+  }
 }
 
 @end

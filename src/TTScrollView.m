@@ -44,7 +44,7 @@ static const NSTimeInterval kOvershoot = 2;
     _scrollEnabled = YES;
     _zoomEnabled = YES;
     _rotateEnabled = YES;
-    _orientation = TTDeviceOrientation();
+    _orientation = UIDeviceOrientationPortrait;
     _holdsAfterTouchingForInterval = 0;
     _tapTimer = nil;
     _holdingTimer = nil;
@@ -222,18 +222,6 @@ static const NSTimeInterval kOvershoot = 2;
   }
 }
 
-- (CGAffineTransform)transformForOrientation:(UIInterfaceOrientation)orientation {
-  if (orientation == UIInterfaceOrientationLandscapeLeft) {
-    return CGAffineTransformMakeRotation(M_PI*1.5);
-  } else if (orientation == UIInterfaceOrientationLandscapeRight) {
-    return CGAffineTransformMakeRotation(M_PI/2);
-  } else if (_orientation == UIInterfaceOrientationPortraitUpsideDown) {
-    return CGAffineTransformMakeRotation(-M_PI);
-  } else {
-    return CGAffineTransformIdentity;
-  }
-}
-
 - (CGPoint)touchLocation:(UITouch*)touch {
   CGPoint point = [touch locationInView:self];
   if (UIInterfaceOrientationIsLandscape(_orientation)) {
@@ -399,7 +387,7 @@ static const NSTimeInterval kOvershoot = 2;
 - (void)layoutPage {
   UIView* page = [self pageAtIndex:_centerPageIndex create:YES];
   if (page) {
-    CGAffineTransform rotation = [self transformForOrientation:_orientation];
+    CGAffineTransform rotation = TTRotateTransformForOrientation(_orientation);
     CGPoint offset = [self offsetForOrientation:_pageEdges.left y:_pageEdges.top];
     CGRect frame = [self frameOfPageAtIndex:_centerPageIndex];
     
@@ -421,7 +409,7 @@ static const NSTimeInterval kOvershoot = 2;
 - (void)layoutAdjacentPages {
   BOOL flipped = self.flipped;
   BOOL pinched = self.pinched;
-  CGAffineTransform rotation = [self transformForOrientation:_orientation];
+  CGAffineTransform rotation = TTRotateTransformForOrientation(_orientation);
 
   NSInteger minPageIndex = _centerPageIndex - kOffscreenPages;
   NSInteger maxPageIndex = _centerPageIndex + kOffscreenPages;
@@ -888,7 +876,7 @@ static const NSTimeInterval kOvershoot = 2;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // UIResponder
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   [super touchesBegan:touches withEvent:event];
   
   if (_touchCount < 2) {
@@ -1027,7 +1015,7 @@ static const NSTimeInterval kOvershoot = 2;
         [self stopDragging:YES];
       }
       
-      if (self.pinched || (_touchCount == 0 && self.pulled)) {
+      if ((self.pinched || (_touchCount == 0 && self.pulled)) && self.scrollEnabled) {
         UIEdgeInsets edges = [self pageEdgesForAnimation];
         NSTimeInterval dur = self.flicked ? kFlickDuration : kBounceDuration;
         //_overshoot = kOvershoot;
@@ -1060,12 +1048,12 @@ static const NSTimeInterval kOvershoot = 2;
 // UIDeviceOrientationDidChangeNotification
 
 - (void)deviceOrientationDidChange:(void*)object {
-  UIInterfaceOrientation orientation = TTDeviceOrientation();
-  if (_rotateEnabled && !_holding
-      && (![_delegate respondsToSelector:@selector(scrollView:shouldAutorotateToInterfaceOrientation:)]
-      || [_delegate scrollView:self shouldAutorotateToInterfaceOrientation:orientation])) {
-    self.orientation = orientation;
-  }
+//  UIInterfaceOrientation orientation = TTDeviceOrientation();
+//  if (_rotateEnabled && !_holding
+//      && (![_delegate respondsToSelector:@selector(scrollView:shouldAutorotateToInterfaceOrientation:)]
+//      || [_delegate scrollView:self shouldAutorotateToInterfaceOrientation:orientation])) {
+//    self.orientation = orientation;
+//  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

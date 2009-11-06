@@ -24,11 +24,15 @@
 #import "Three20/TTAlertViewController.h"
 #import "Three20/TTActionSheetController.h"
 #import "Three20/TTPostController.h"
+#import "Three20/TTTextBarController.h"
 
 #import "Three20/TTView.h"
 #import "Three20/TTImageView.h"
 #import "Three20/TTYouTubeView.h"
 #import "Three20/TTScrollView.h"
+
+#import "Three20/TTLauncherView.h"
+#import "Three20/TTLauncherItem.h"
 
 #import "Three20/TTLabel.h"
 #import "Three20/TTStyledTextLabel.h"

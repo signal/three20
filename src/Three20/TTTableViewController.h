@@ -16,6 +16,7 @@
   id<UITableViewDelegate> _tableDelegate;
   NSTimer* _bannerTimer;
   UITableViewStyle _tableViewStyle;
+  UIInterfaceOrientation _lastInterfaceOrientation;
   BOOL _variableHeightRows;
 }
 
@@ -34,6 +35,8 @@
 @property(nonatomic,retain) UIView* loadingView;
 @property(nonatomic,retain) UIView* errorView;
 @property(nonatomic,retain) UIView* emptyView;
+
+@property(nonatomic,readonly) UIView* menuView;
 
 /** 
  * The data source used to populate the table view.

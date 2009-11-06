@@ -1,10 +1,9 @@
-// Copyright 2004-2009 Facebook. All Rights Reserved.
-
 #import "Three20/TTPostController.h"
 #import "Three20/TTStyle.h"
 #import "Three20/TTStyleSheet.h"
 #import "Three20/TTNavigator.h"
 #import "Three20/TTActivityLabel.h"
+#import "Three20/TTView.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // global
@@ -16,7 +15,7 @@ static const CGFloat kMarginY = 6;
 
 @implementation TTPostController
 
-@synthesize delegate = _delegate, result = _result, textEditor = _textEditor, 
+@synthesize delegate = _delegate, result = _result, textView = _textView, 
             originView = _originView;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,14 +38,18 @@ static const CGFloat kMarginY = 6;
     [app setStatusBarHidden:NO animated:YES];
     [app setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
   }
-  [_textEditor.textView becomeFirstResponder];
+  [_textView becomeFirstResponder];
 }
 
 - (void)hideKeyboard {
   UIApplication* app = [UIApplication sharedApplication];
   [app setStatusBarHidden:_originalStatusBarHidden animated:YES];
   [app setStatusBarStyle:_originalStatusBarStyle animated:NO];
-  [_textEditor.textView resignFirstResponder];
+  [_textView resignFirstResponder];
+}
+
+- (CGAffineTransform)transformForOrientation {
+  return TTRotateTransformForOrientation(TTInterfaceOrientation());
 }
 
 - (void)showActivity:(NSString*)activityText {
@@ -57,35 +60,36 @@ static const CGFloat kMarginY = 6;
 
   if (activityText) {
     _activityView.text = activityText;
-    _activityView.frame = CGRectOffset(CGRectInset(_textEditor.frame, 13, 13), 2, 0);
+    _activityView.frame = CGRectOffset(CGRectInset(_textView.frame, 13, 13), 2, 0);
     _activityView.hidden = NO;
-    _textEditor.textView.hidden = YES;
+    _textView.hidden = YES;
+    self.navigationItem.rightBarButtonItem.enabled = NO;
   } else {
     _activityView.hidden = YES;
-    _textEditor.textView.hidden = NO;
-  }
-}
-
-- (void)enableButtons:(BOOL)enabled {
-  for (int i = 1; i < _navigationBar.items.count; ++i) {
-    UIBarButtonItem* item = [_navigationBar.items objectAtIndex:i];
-    item.enabled = enabled;
+    _textView.hidden = NO;
+    self.navigationItem.rightBarButtonItem.enabled = YES;
   }
 }
 
 - (void)layoutTextEditor {
-  _textEditor.frame = CGRectMake(kMarginX, kMarginY+_navigationBar.height, self.view.width - kMarginX*2,
-                                self.view.height - (TT_KEYBOARD_HEIGHT+_navigationBar.height+kMarginY*2));
-  _textEditor.textView.hidden = NO;
+  CGFloat keyboard = TTKeyboardHeightForOrientation(TTInterfaceOrientation());
+  _screenView.frame = CGRectMake(0, _navigationBar.bottom,
+                                 self.view.orientationWidth,
+                                 self.view.orientationHeight - (keyboard+_navigationBar.height));
+
+  _textView.frame = CGRectMake(kMarginX, kMarginY+_navigationBar.height,
+                                 _screenView.width - kMarginX*2,
+                                 _screenView.height - kMarginY*2);
+  _textView.hidden = NO;
 }
 
 - (void)showAnimationDidStop {
-  _textEditor.textView.hidden = NO;
+  _textView.hidden = NO;
 }
 
 - (void)dismissAnimationDidStop {
   if ([_delegate respondsToSelector:@selector(postController:didPostText:withResult:)]) {
-    [_delegate postController:self didPostText:_textEditor.text withResult:_result];
+    [_delegate postController:self didPostText:_textView.text withResult:_result];
   }
   
   TT_RELEASE_SAFELY(_originView);
@@ -128,9 +132,10 @@ static const CGFloat kMarginY = 6;
     _defaultText = nil;
     _originRect = CGRectZero;
     _originView = nil;
-    _textEditor = nil;
-    _screenView = nil;
+    _innerView = nil;
     _navigationBar = nil;
+    _screenView = nil;
+    _textView = nil;
     _activityView = nil;
 
     if (query) {
@@ -165,9 +170,9 @@ static const CGFloat kMarginY = 6;
   TT_RELEASE_SAFELY(_result);
   TT_RELEASE_SAFELY(_defaultText);
   TT_RELEASE_SAFELY(_originView);
-  TT_RELEASE_SAFELY(_textEditor);
+  TT_RELEASE_SAFELY(_textView);
   TT_RELEASE_SAFELY(_navigationBar);
-  TT_RELEASE_SAFELY(_screenView);
+  TT_RELEASE_SAFELY(_innerView);
   TT_RELEASE_SAFELY(_activityView);
   [super dealloc];
 }
@@ -179,26 +184,54 @@ static const CGFloat kMarginY = 6;
   [super loadView];
   self.view.frame = [UIScreen mainScreen].applicationFrame;
   self.view.backgroundColor = [UIColor clearColor];
+  self.view.autoresizesSubviews = YES;
   
-  _screenView = [[UIView alloc] init];
-  _screenView.backgroundColor = [UIColor blackColor];
+  _innerView = [[UIView alloc] init];
+  _innerView.backgroundColor = [UIColor blackColor];
+  _innerView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+  _innerView.autoresizesSubviews = YES;
+  [self.view addSubview:_innerView];
+
+  _screenView = [[TTView alloc] init];
+  _screenView.backgroundColor = [UIColor clearColor];
+  _screenView.style = TTSTYLE(postTextEditor);
+  _screenView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+  _screenView.autoresizesSubviews = YES;
   [self.view addSubview:_screenView];
 
-  _textEditor = [[TTTextEditor alloc] init];
-  _textEditor.textDelegate = self;
-  _textEditor.autoresizesToText = NO;
-  _textEditor.textView.font = TTSTYLEVAR(font);
-  _textEditor.textView.textColor = [UIColor blackColor];
-  _textEditor.textView.contentInset = UIEdgeInsetsMake(0, 4, 0, 4);
-  _textEditor.textView.keyboardAppearance = UIKeyboardAppearanceAlert;
-  _textEditor.backgroundColor = [UIColor clearColor];
-  _textEditor.style = TTSTYLE(postTextEditor);
-  [self.view addSubview:_textEditor];
+  _textView = [[UITextView alloc] init];
+  _textView.delegate = self;
+  _textView.font = TTSTYLEVAR(font);
+  _textView.textColor = [UIColor blackColor];
+  _textView.contentInset = UIEdgeInsetsMake(0, 4, 0, 4);
+  _textView.keyboardAppearance = UIKeyboardAppearanceAlert;
+  _textView.backgroundColor = [UIColor clearColor];
+  [self.view addSubview:_textView];
 
   _navigationBar = [[UINavigationBar alloc] init];
   _navigationBar.barStyle = UIBarStyleBlackOpaque;
+  _navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
   [_navigationBar pushNavigationItem:self.navigationItem animated:NO];
-  [self.view addSubview:_navigationBar];    
+  [_innerView addSubview:_navigationBar];    
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+  return TTIsSupportedOrientation(interfaceOrientation);
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+        duration:(NSTimeInterval)duration {
+  [UIView beginAnimations:nil context:nil];
+  [UIView setAnimationDuration:TT_TRANSITION_DURATION];
+  self.view.transform = [self transformForOrientation];
+  self.view.frame = [UIScreen mainScreen].applicationFrame;
+  _innerView.frame = self.view.bounds;
+  [self layoutTextEditor];
+  [UIView commitAnimations];
+}
+
+- (UIView*)rotatingHeaderView {
+  return _navigationBar;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +244,7 @@ static const CGFloat kMarginY = 6;
   if (delegate) {
     [state setObject:delegate forKey:@"delegate"];
   }
-  [state setObject:self.textEditor.text forKey:@"text"];
+  [state setObject:self.textView.text forKey:@"text"];
   
   NSString* title = self.navigationItem.title;
   
@@ -241,23 +274,26 @@ static const CGFloat kMarginY = 6;
 - (void)showInView:(UIView*)view animated:(BOOL)animated {
   [self retain];
   UIWindow* window = view.window ? view.window : [UIApplication sharedApplication].keyWindow;
+
+  self.view.transform = [self transformForOrientation];
+  self.view.frame = [UIScreen mainScreen].applicationFrame;
   [window addSubview:self.view];
   
   if (_defaultText) {
-    _textEditor.text = _defaultText;
+    _textView.text = _defaultText;
     TT_RELEASE_SAFELY(_defaultText);
   } else {
-    _defaultText = [_textEditor.text retain];
+    _defaultText = [_textView.text retain];
   }
   
+  _innerView.frame = self.view.bounds;
   [_navigationBar sizeToFit];
-  _screenView.frame = self.view.bounds;
   _originView.hidden = YES;
       
   if (animated) {
-    _screenView.alpha = 0;
+    _innerView.alpha = 0;
     _navigationBar.alpha = 0;
-    _textEditor.textView.hidden = YES;
+    _textView.hidden = YES;
 
     CGRect originRect = _originRect;
     if (CGRectIsEmpty(originRect) && _originView) {
@@ -265,10 +301,10 @@ static const CGFloat kMarginY = 6;
     }
 
     if (!CGRectIsEmpty(originRect)) {
-      _textEditor.frame = CGRectOffset(originRect, 0, -TTStatusHeight());
+      _screenView.frame = CGRectOffset(originRect, 0, -TTStatusHeight());
     } else {
       [self layoutTextEditor];
-      _textEditor.transform = CGAffineTransformMakeScale(0.00001, 0.00001);
+      _screenView.transform = CGAffineTransformMakeScale(0.00001, 0.00001);
     }
 
     [UIView beginAnimations:nil context:nil];
@@ -277,19 +313,20 @@ static const CGFloat kMarginY = 6;
     [UIView setAnimationDidStopSelector:@selector(showAnimationDidStop)];
     
     _navigationBar.alpha = 1;
-    _screenView.alpha = 1;
+    _innerView.alpha = 1;
     
     if (originRect.size.width) {
       [self layoutTextEditor];
     } else {
-      _textEditor.transform = CGAffineTransformIdentity;
+      _screenView.transform = CGAffineTransformIdentity;
     }
 
     [UIView commitAnimations];
   } else {
-    _screenView.alpha = 1;
-    _textEditor.transform = CGAffineTransformIdentity;
+    _innerView.alpha = 1;
+    _screenView.transform = CGAffineTransformIdentity;
     [self layoutTextEditor];
+    [self showAnimationDidStop];
   }
   
   [self showKeyboard];
@@ -320,9 +357,9 @@ static const CGFloat kMarginY = 6;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-- (TTTextEditor*)textEditor {
+- (UITextView*)textView {
   self.view;
-  return _textEditor;
+  return _textView;
 }
 
 - (UINavigationBar*)navigatorBar {
@@ -341,22 +378,21 @@ static const CGFloat kMarginY = 6;
 }
 
 - (void)post {
-  BOOL shouldDismiss = [self willPostText:_textEditor.text];
+  BOOL shouldDismiss = [self willPostText:_textView.text];
   if ([_delegate respondsToSelector:@selector(postController:willPostText:)]) {
-    shouldDismiss = [_delegate postController:self willPostText:_textEditor.text];
+    shouldDismiss = [_delegate postController:self willPostText:_textView.text];
   }
   
   if (shouldDismiss) {
     [self dismissWithResult:nil animated:YES];
   } else {
-    [self enableButtons:NO];
     [self showActivity:[self titleForActivity]];
   }
 }
 
 - (void)cancel {
-  if (!_textEditor.text.isEmptyOrWhitespace
-      && !(_defaultText && [_defaultText isEqualToString:_textEditor.text])) {
+  if (!_textView.text.isEmptyOrWhitespace
+      && !(_defaultText && [_defaultText isEqualToString:_textView.text])) {
     UIAlertView* cancelAlertView = [[[UIAlertView alloc] initWithTitle:
       TTLocalizedString(@"Cancel", @"")
       message:TTLocalizedString(@"Are you sure you want to cancel?", @"")
@@ -387,7 +423,7 @@ static const CGFloat kMarginY = 6;
 
     _originView.hidden = NO;
     _activityView.hidden = YES;
-    _textEditor.textView.hidden = YES;
+    _textView.hidden = YES;
     
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:TT_TRANSITION_DURATION];
@@ -396,13 +432,12 @@ static const CGFloat kMarginY = 6;
     [UIView setAnimationDidStopSelector:@selector(dismissAnimationDidStop)];
     
     if (!CGRectIsEmpty(originRect)) {
-      _textEditor.frame = CGRectOffset(originRect, 0, -TTStatusHeight());
+      _screenView.frame = CGRectOffset(originRect, 0, -TTStatusHeight());
     } else {
-      _textEditor.transform = CGAffineTransformMakeScale(0.00001, 0.00001);
+      _screenView.transform = CGAffineTransformMakeScale(0.00001, 0.00001);
     }
 
-    _textEditor.alpha = 0.5;
-    _screenView.alpha = 0;
+    _innerView.alpha = 0;
     _navigationBar.alpha = 0;
     
     [UIView commitAnimations];
@@ -414,7 +449,6 @@ static const CGFloat kMarginY = 6;
 }
 
 - (void)failWithError:(NSError*)error {
-  [self enableButtons:YES];
   [self showActivity:nil];
   
   NSString* title = [self titleForError:error];

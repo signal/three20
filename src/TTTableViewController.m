@@ -22,7 +22,7 @@ static const CGFloat kBannerViewHeight = 22;
 @synthesize tableView = _tableView, tableBannerView = _tableBannerView,
             tableOverlayView = _tableOverlayView,
             loadingView = _loadingView, errorView= _errorView, emptyView = _emptyView,
-            dataSource = _dataSource, tableViewStyle = _tableViewStyle,
+            menuView = _menuView, dataSource = _dataSource, tableViewStyle = _tableViewStyle,
             variableHeightRows = _variableHeightRows;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,6 +125,7 @@ static const CGFloat kBannerViewHeight = 22;
     _bannerTimer = nil;
     _variableHeightRows = NO;
     _tableViewStyle = style;
+    _lastInterfaceOrientation = self.interfaceOrientation;
   }
   return self;
 }
@@ -180,12 +181,15 @@ static const CGFloat kBannerViewHeight = 22;
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
 
-  [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow] animated:NO];
-
-  if ([_tableView isKindOfClass:[TTTableView class]]) {
+  if (_lastInterfaceOrientation != self.interfaceOrientation) {
+    _lastInterfaceOrientation = self.interfaceOrientation;
+    [_tableView reloadData];
+  } else if ([_tableView isKindOfClass:[TTTableView class]]) {
     TTTableView* tableView = (TTTableView*)_tableView;
     tableView.highlightedLabel = nil;    
   }
+
+  [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow] animated:NO];
 }  
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -404,8 +408,9 @@ static const CGFloat kBannerViewHeight = 22;
             TTLOG(@"INSERTING ROW AT %@", newIndexPath);
             [_tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath]
                         withRowAnimation:UITableViewRowAnimationTop];
+            
             [_tableView scrollToRowAtIndexPath:newIndexPath
-                        atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                        atScrollPosition:UITableViewScrollPositionNone animated:NO];
           }
           [self invalidateView];
         } else {
@@ -683,11 +688,11 @@ static const CGFloat kBannerViewHeight = 22;
 }
 
 - (CGRect)rectForOverlayView {
-  return [_tableView frameWithKeyboardSubtracted];
+  return [_tableView frameWithKeyboardSubtracted:0];
 }
 
 - (CGRect)rectForBannerView {
-  CGRect tableFrame = [_tableView frameWithKeyboardSubtracted];
+  CGRect tableFrame = [_tableView frameWithKeyboardSubtracted:0];
   return CGRectMake(tableFrame.origin.x,
                     (tableFrame.origin.y + tableFrame.size.height) - kBannerViewHeight,
                     tableFrame.size.width, kBannerViewHeight);

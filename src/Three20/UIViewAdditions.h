@@ -44,7 +44,9 @@
 /**
  * WARNING: This depends on undocumented APIs and may be fragile.  For testing only.
  */
+#ifdef DEBUG
 - (void)simulateTapAtPoint:(CGPoint)location;
+#endif
 
 /**
  * Calculates the offset of this view from another view in screen coordinates.
@@ -56,7 +58,7 @@
  *
  * If the keyboard is not showing, this will simply return the normal frame.
  */
-- (CGRect)frameWithKeyboardSubtracted;
+- (CGRect)frameWithKeyboardSubtracted:(CGFloat)plusHeight;
 
 /**
  * Shows the view in a window at the bottom of the screen.
@@ -73,5 +75,10 @@
  * observers who adjust their layout for the keyboard will also adjust for this view.
  */
 - (void)dismissAsKeyboard:(BOOL)animated;
+
+/**
+ * The view controller whose view contains this view.
+ */
+- (UIViewController*)viewController;
 
 @end

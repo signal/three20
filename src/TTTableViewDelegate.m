@@ -110,6 +110,12 @@ static const CGFloat kSectionHeaderHeight = 35;
   [TTURLRequestQueue mainQueue].suspended = NO;
 }
 
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+  if (_controller.menuView) {
+    [_controller hideMenu:YES];
+  }
+}
+
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
   [TTURLRequestQueue mainQueue].suspended = YES;
 
@@ -132,6 +138,15 @@ static const CGFloat kSectionHeaderHeight = 35;
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
   [TTURLRequestQueue mainQueue].suspended = NO;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// TTTableViewDelegate
+
+- (void)tableView:(UITableView*)tableView touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (_controller.menuView) {
+    [_controller hideMenu:YES];
+  }
 }
 
 @end

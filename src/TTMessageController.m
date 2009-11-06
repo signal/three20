@@ -197,6 +197,7 @@
       textField.backgroundColor = TTSTYLEVAR(backgroundColor);
       textField.font = TTSTYLEVAR(messageFont);
       textField.returnKeyType = UIReturnKeyNext;
+      textField.autoresizingMask = UIViewAutoresizingFlexibleWidth;
       [textField sizeToFit];
       
       UILabel* label = [[[UILabel alloc] init] autorelease];
@@ -213,6 +214,7 @@
 
       UIView* separator = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 1)] autorelease];
       separator.backgroundColor = TTSTYLEVAR(messageFieldSeparatorColor);
+      separator.autoresizingMask = UIViewAutoresizingFlexibleWidth;
       [_scrollView addSubview:separator];
     }
   }
@@ -305,7 +307,7 @@
     }
     ++index;
   }
-  if (_textEditor.textView.isFirstResponder) {
+  if (_textEditor.isFirstResponder) {
     return _fieldViews.count;
   }
   return -1;
@@ -316,7 +318,7 @@
     UIView* view = [_fieldViews objectAtIndex:index];
     [view becomeFirstResponder];
   } else {
-    [_textEditor.textView becomeFirstResponder];
+    [_textEditor becomeFirstResponder];
   }
 }
 
@@ -383,19 +385,20 @@
   
   _scrollView = [[[UIScrollView class] alloc] initWithFrame:TTKeyboardNavigationFrame()];
   _scrollView.backgroundColor = TTSTYLEVAR(backgroundColor);
-  _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
   _scrollView.canCancelContentTouches = NO;
   _scrollView.showsVerticalScrollIndicator = NO;
   _scrollView.showsHorizontalScrollIndicator = NO;
   [self.view addSubview:_scrollView];
 
-  _textEditor = [[TTTextEditor alloc] initWithFrame:CGRectMake(0, 0, _scrollView.height, 0)];
-  _textEditor.textDelegate = self;
+  _textEditor = [[TTTextEditor alloc] initWithFrame:CGRectMake(0, 0, _scrollView.width, 0)];
+  _textEditor.delegate = self;
   _textEditor.backgroundColor = TTSTYLEVAR(backgroundColor);
-  _textEditor.textView.font = TTSTYLEVAR(messageFont);
+  _textEditor.font = TTSTYLEVAR(messageFont);
+  _textEditor.autoresizingMask = UIViewAutoresizingFlexibleWidth;
   _textEditor.autoresizesToText = YES;
   _textEditor.showsExtraLine = YES;
-  _textEditor.minNumberOfLines = 5;
+  _textEditor.minNumberOfLines = 6;
   [_textEditor sizeToFit];
   
   [self createFieldViews];
@@ -432,6 +435,16 @@
   }
   
   [self updateSendCommand];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+  return TTIsSupportedOrientation(interfaceOrientation);
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+  [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
+  _scrollView.height = self.view.height - TTKeyboardHeight();
+  [self layoutViews];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -507,7 +520,7 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
   NSUInteger fieldIndex = [_fieldViews indexOfObject:textField];
   UIView* nextView = fieldIndex == _fieldViews.count-1
-    ? _textEditor.textView
+    ? _textEditor
     : [_fieldViews objectAtIndex:fieldIndex+1];
   [nextView becomeFirstResponder];
   return NO;
@@ -528,7 +541,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // TTTextEditorDelegate
 
-- (void)textViewDidChange:(UITextView *)textView {
+- (void)textEditorDidChange:(TTTextEditor*)textEditor {
   [self updateSendCommand];
   _isModified = YES;
 }
@@ -735,6 +748,7 @@
       _activityView = [[TTActivityLabel alloc] initWithFrame:frame
                                                style:TTActivityLabelStyleWhiteBox];
       _activityView.text = [self titleForSending];
+      _activityView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
       [self.view addSubview:_activityView];
     }
   } else {

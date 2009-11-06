@@ -54,7 +54,10 @@
 // Dimensions of common iPhone OS Views
 
 #define TT_ROW_HEIGHT 44
+#define TT_TOOLBAR_HEIGHT 44
+#define TT_LANDSCAPE_TOOLBAR_HEIGHT 33
 #define TT_KEYBOARD_HEIGHT 216
+#define TT_LANDSCAPE_KEYBOARD_HEIGHT 160
 #define TT_ROUNDED -1
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,10 +167,38 @@ BOOL TTIsEmptyArray(id object);
  * Tests if an object is a string which is empty.
  */
 BOOL TTIsEmptyString(id object);
+
+/**
+ * Tests if the keyboard is visible.
+ */
+BOOL TTIsKeyboardVisible();
+
+/**
+ * Tests if the device has phone capabilities.
+ */
+BOOL TTIsPhoneSupported();
+
 /**
  * Gets the current device orientation.
  */
-UIInterfaceOrientation TTDeviceOrientation();
+UIDeviceOrientation TTDeviceOrientation();
+
+/**
+ * Gets the current interface orientation.
+ */
+UIInterfaceOrientation TTInterfaceOrientation();
+
+/**
+ * Checks if the orientation is portrait, landscape left, or landscape right.
+ *
+ * This helps to ignore upside down and flat orientations.
+ */
+BOOL TTIsSupportedOrientation(UIInterfaceOrientation orientation);
+
+/**
+ * Gets the rotation transform for a given orientation.
+ */
+CGAffineTransform TTRotateTransformForOrientation(UIInterfaceOrientation orientation);
 
 /**
  * Gets the bounds of the screen with device orientation factored in.
@@ -203,6 +234,18 @@ CGFloat TTStatusHeight();
  * The height of the area containing the status bar and navigation bar.
  */
 CGFloat TTBarsHeight();
+
+/**
+ * The height of a toolbar.
+ */
+CGFloat TTToolbarHeight();
+CGFloat TTToolbarHeightForOrientation(UIInterfaceOrientation orientation);
+
+/**
+ * The height of the keyboard.
+ */
+CGFloat TTKeyboardHeight();
+CGFloat TTKeyboardHeightForOrientation(UIInterfaceOrientation orientation);
 
 /**
  * Returns a rectangle that is smaller or larger than the source rectangle.
