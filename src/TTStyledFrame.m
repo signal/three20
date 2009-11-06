@@ -86,7 +86,7 @@
 - (void)drawSubframes {
   TTStyledFrame* frame = _firstChildFrame;
   while (frame) {
-    [frame drawInRect:_bounds];
+    [frame drawInRect:frame.bounds];
     frame = frame.nextFrame;
   }
 }
