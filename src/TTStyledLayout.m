@@ -295,7 +295,7 @@
     if (elt.firstChild) {
       TTStyledNode* child = elt.firstChild;
       TTStyledLayout* layout = [[[TTStyledLayout alloc] initWithX:_minX
-                                                        width:0 height:_height] autorelease];
+                                                        width:padding.minSize.width height:_height] autorelease];
       layout.font = _font;
       layout.invalidImages = _invalidImages;
       [layout layout:child];

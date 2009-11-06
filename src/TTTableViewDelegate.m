@@ -42,7 +42,35 @@ static const CGFloat kSectionHeaderHeight = 35;
 // UITableViewDelegate
 
 - (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+  TTStyle *tableHeaderStyle = nil;
+  UIColor *tableHeaderTextColor = nil;
+  UIColor *tableHeaderShadowColor = nil;
+  UIFont *tableHeaderFont = nil;
+  BOOL customView = NO;
+  
   if (tableView.style == UITableViewStylePlain && TTSTYLEVAR(tableHeaderTintColor)) {
+    tableHeaderStyle = TTSTYLE(tableHeader);
+    tableHeaderTextColor = TTSTYLEVAR(tableHeaderTextColor)
+                            ? TTSTYLEVAR(tableHeaderTextColor)
+                            : TTSTYLEVAR(linkTextColor);
+    tableHeaderShadowColor = TTSTYLEVAR(tableHeaderShadowColor)
+                              ? TTSTYLEVAR(tableHeaderShadowColor)
+                              : [UIColor clearColor];
+    tableHeaderFont = TTSTYLEVAR(tableHeaderPlainFont);
+    customView = YES;
+  } else if (tableView.style == UITableViewStyleGrouped && TTSTYLEVAR(tableHeaderGroupedTextColor)) {
+    tableHeaderStyle = TTSTYLE(tableHeaderGrouped);
+    tableHeaderTextColor = TTSTYLEVAR(tableHeaderGroupedTextColor)
+                            ? TTSTYLEVAR(tableHeaderGroupedTextColor)
+                            : TTSTYLEVAR(linkTextColor);
+    tableHeaderShadowColor = TTSTYLEVAR(tableHeaderGroupedShadowColor)
+                              ? TTSTYLEVAR(tableHeaderGroupedShadowColor)
+                              : [UIColor clearColor];
+    tableHeaderFont = TTSTYLEVAR(tableHeaderGroupedFont);
+    customView = YES;
+  }
+  
+  if (customView) {
     if ([tableView.dataSource respondsToSelector:@selector(tableView:titleForHeaderInSection:)]) {
       NSString* title = [tableView.dataSource tableView:tableView titleForHeaderInSection:section];
       if (title.length) {
@@ -52,6 +80,10 @@ static const CGFloat kSectionHeaderHeight = 35;
             _headers = [[NSMutableDictionary alloc] init];
           }
           header = [[[TTTableHeaderView alloc] initWithTitle:title] autorelease];
+          header.style = tableHeaderStyle;
+          header.label.textColor = tableHeaderTextColor;
+          header.label.shadowColor = tableHeaderShadowColor;
+          header.label.font = tableHeaderFont;
           [_headers setObject:header forKey:title];
         }
         return header;
@@ -180,16 +212,16 @@ static const CGFloat kSectionHeaderHeight = 35;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface TTTableViewGroupedVarHeightDelegate : TTTableViewVarHeightDelegate
-@end
-
 @implementation TTTableViewGroupedVarHeightDelegate
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // UITableViewDelegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
-  NSString* title = [tableView.dataSource tableView:tableView titleForHeaderInSection:section];
+  NSString* title = nil;
+  if ([tableView.dataSource respondsToSelector:@selector(tableView:titleForHeaderInSection:)]) {
+    title = [tableView.dataSource tableView:tableView titleForHeaderInSection:section];
+  }
   if (!title.length) {
     return kEmptyHeaderHeight;
   } else {

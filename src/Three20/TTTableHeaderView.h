@@ -4,6 +4,8 @@
   UILabel* _label;
 }
 
+@property (nonatomic,readonly) UILabel *label;
+
 - (id)initWithTitle:(NSString*)title;
 
 @end

@@ -609,7 +609,12 @@ static const CGFloat kBannerViewHeight = 22;
 
 - (id<UITableViewDelegate>)createDelegate {
   if (_variableHeightRows) {
-    return [[[TTTableViewVarHeightDelegate alloc] initWithController:self] autorelease];
+    if (self.tableView.style == UITableViewStylePlain) {
+      return [[[TTTableViewVarHeightDelegate alloc] initWithController:self] autorelease];      
+    } else {
+      return [[[TTTableViewGroupedVarHeightDelegate alloc] initWithController:self] autorelease];
+    }
+
   } else {
     return [[[TTTableViewDelegate alloc] initWithController:self] autorelease];
   }

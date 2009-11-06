@@ -609,6 +609,14 @@
   return nil;
 }
 
+- (UIColor*)tableHeaderGroupedTextColor {
+  return nil;
+}
+
+- (UIColor*)tableHeaderGroupedShadowColor {
+  return nil;
+}
+
 - (UIColor*)tableSeparatorColor {
   return [UIColor colorWithWhite:0.9 alpha:1];
 }
@@ -736,7 +744,8 @@
     if (color.value < 0.2) {
       return [color addHue:0 saturation:0 value:0.2];
     } else if (color.saturation > 0.3) {
-      return [color multiplyHue:1 saturation:1 value:0.4];
+      //return [color multiplyHue:1 saturation:1 value:0.4];
+      return [color multiplyHue:1 saturation:1.4 value:1];
     } else {
       return [color multiplyHue:1 saturation:2.3 value:0.64];
     }
@@ -744,7 +753,8 @@
     if (color.saturation < 0.5) {
       return [color multiplyHue:1 saturation:1.6 value:0.97];
     } else {
-      return [color multiplyHue:1 saturation:1.25 value:0.75];
+      //return [color multiplyHue:1 saturation:1.25 value:0.75];
+      return [color multiplyHue:1 saturation:1.2 value:1];
     }
   }
 }

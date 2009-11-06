@@ -27,6 +27,8 @@
 @property(nonatomic,readonly) UIColor* tableHeaderTextColor;
 @property(nonatomic,readonly) UIColor* tableHeaderShadowColor;
 @property(nonatomic,readonly) UIColor* tableHeaderTintColor;
+@property(nonatomic,readonly) UIColor* tableHeaderGroupedTextColor;  // me
+@property(nonatomic,readonly) UIColor* tableHeaderGroupedShadowColor;  // me
 @property(nonatomic,readonly) UIColor* tableSeparatorColor;
 @property(nonatomic,readonly) UIColor* tablePlainBackgroundColor;
 @property(nonatomic,readonly) UIColor* tableGroupedBackgroundColor;
