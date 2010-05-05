@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+#import "Three20UI/TTTableTextItem.h"
 #import "Three20UI/TTTableLinkedItem.h"
 
 // Core
@@ -27,12 +28,14 @@
 
 @synthesize URL           = _URL;
 @synthesize accessoryURL  = _accessoryURL;
+@synthesize query         = _query;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)dealloc {
   TT_RELEASE_SAFELY(_URL);
   TT_RELEASE_SAFELY(_accessoryURL);
+  TT_RELEASE_SAFELY(_query);
 
   [super dealloc];
 }
@@ -52,6 +55,14 @@
   return self;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
++ (id)itemWithText:(NSString*)text URL:(NSString*)URL query:(NSDictionary*) query {
+  TTTableTextItem* item = [[[self alloc] init] autorelease];
+  item.text = text;
+  item.URL = URL;
+  item.query = query;
+  return item;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)encodeWithCoder:(NSCoder*)encoder {

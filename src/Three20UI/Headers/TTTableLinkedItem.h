@@ -20,9 +20,13 @@
 @interface TTTableLinkedItem : TTTableItem {
   NSString* _URL;
   NSString* _accessoryURL;
+  NSDictionary* _query;
+
 }
 
 @property (nonatomic, copy) NSString* URL;
 @property (nonatomic, copy) NSString* accessoryURL;
+@property (nonatomic, copy) NSDictionary* query;
 
++ (id)itemWithText:(NSString*)text URL:(NSString*)URL query:(NSDictionary*)query;
 @end

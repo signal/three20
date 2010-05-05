@@ -18,6 +18,7 @@
 
 // UI
 #import "Three20UI/TTNavigator.h"
+#import "Three20UINavigator/TTURLAction.h"
 #import "Three20UI/TTTableViewDataSource.h"
 #import "Three20UI/TTTableViewController.h"
 #import "Three20UI/TTTableHeaderView.h"
@@ -118,7 +119,8 @@
   if ([object isKindOfClass:[TTTableLinkedItem class]]) {
     TTTableLinkedItem* item = object;
     if (item.URL && [_controller shouldOpenURL:item.URL]) {
-      TTOpenURL(item.URL);
+      [[TTNavigator navigator] openURLAction:[[[TTURLAction actionWithURLPath:item.URL] applyQuery:item.query]
+                                              applyAnimated:YES]];
     }
 
     if ([object isKindOfClass:[TTTableButton class]]) {
