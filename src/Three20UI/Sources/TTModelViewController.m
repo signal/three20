@@ -50,7 +50,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)dealloc {
-  [_model.delegates removeObject:self];
+  [_model.delegates removeObjectIdenticalTo:self];
   TT_RELEASE_SAFELY(_model);
   TT_RELEASE_SAFELY(_modelError);
   [super dealloc];
