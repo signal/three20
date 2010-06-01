@@ -1,7 +1,5 @@
 #import "MockPhotoSource.h"
 
-#import "Three20Core/NSArrayAdditions.h"
-
 @implementation MockPhotoSource
 
 @synthesize title = _title;
@@ -13,7 +11,9 @@
   _fakeLoadTimer = nil;
 
   if (_type & MockPhotoSourceLoadError) {
-    [_delegates perform:@selector(model:didFailLoadWithError:) withObject:self withObject:nil];
+    [_delegates makeObjectsPerformSelector: @selector(model:didFailLoadWithError:)
+                                withObject: self
+                                withObject: nil];
   } else {
     NSMutableArray* newPhotos = [NSMutableArray array];
 
@@ -38,7 +38,7 @@
       }
     }
 
-    [_delegates perform:@selector(modelDidFinishLoad:) withObject:self];
+    [_delegates makeObjectsPerformSelector:@selector(modelDidFinishLoad:) withObject:self];
   }
 }
 
@@ -94,7 +94,7 @@
 
 - (void)load:(TTURLRequestCachePolicy)cachePolicy more:(BOOL)more {
   if (cachePolicy & TTURLRequestCachePolicyNetwork) {
-    [_delegates perform:@selector(modelDidStartLoad:) withObject:self];
+    [_delegates makeObjectsPerformSelector:@selector(modelDidStartLoad:) withObject:self];
 
     TT_RELEASE_SAFELY(_photos);
     _fakeLoadTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self
