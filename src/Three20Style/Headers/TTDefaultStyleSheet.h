@@ -22,33 +22,42 @@
 
 @interface TTDefaultStyleSheet : TTStyleSheet
 
-@property (nonatomic, readonly) UIColor* textColor;
-@property (nonatomic, readonly) UIColor* highlightedTextColor;
-@property (nonatomic, readonly) UIColor* placeholderTextColor;
-@property (nonatomic, readonly) UIColor* timestampTextColor;
-@property (nonatomic, readonly) UIColor* linkTextColor;
-@property (nonatomic, readonly) UIColor* moreLinkTextColor;
-@property (nonatomic, readonly) UIColor* selectedTextColor;
-@property (nonatomic, readonly) UIColor* photoCaptionTextColor;
+// Common styles
+@property (nonatomic, readonly) UIColor*  textColor;
+@property (nonatomic, readonly) UIColor*  highlightedTextColor;
+@property (nonatomic, readonly) UIFont*   font;
+@property (nonatomic, readonly) UIColor*  backgroundColor;
+@property (nonatomic, readonly) UIColor*  navigationBarTintColor;
+@property (nonatomic, readonly) UIColor*  toolbarTintColor;
+@property (nonatomic, readonly) UIColor*  searchBarTintColor;
 
-@property (nonatomic, readonly) UIColor* navigationBarTintColor;
-@property (nonatomic, readonly) UIColor* toolbarTintColor;
-@property (nonatomic, readonly) UIColor* searchBarTintColor;
+// Tables
+@property (nonatomic, readonly) UIColor*  tablePlainBackgroundColor;
+@property (nonatomic, readonly) UIColor*  tableGroupedBackgroundColor;
+@property (nonatomic, readonly) UIColor*  searchTableBackgroundColor;
+@property (nonatomic, readonly) UIColor*  searchTableSeparatorColor;
+
+// Table Headers
+@property (nonatomic, readonly) UIColor*  tableHeaderTextColor;
+@property (nonatomic, readonly) UIColor*  tableHeaderShadowColor;
+@property (nonatomic, readonly) CGSize    tableHeaderShadowOffset;
+@property (nonatomic, readonly) UIColor*  tableHeaderTintColor;
+
+// Photo Captions
+@property (nonatomic, readonly) UIColor*  photoCaptionTextColor;
+@property (nonatomic, readonly) UIColor*  photoCaptionTextShadowColor;
+@property (nonatomic, readonly) CGSize    photoCaptionTextShadowOffset;
+
+@property (nonatomic, readonly) UIColor*  timestampTextColor;
+@property (nonatomic, readonly) UIColor*  linkTextColor;
+@property (nonatomic, readonly) UIColor*  moreLinkTextColor;
+
 @property (nonatomic, readonly) UIColor* screenBackgroundColor;
-@property (nonatomic, readonly) UIColor* backgroundColor;
 
 @property (nonatomic, readonly) UIColor* tableActivityTextColor;
 @property (nonatomic, readonly) UIColor* tableErrorTextColor;
 @property (nonatomic, readonly) UIColor* tableSubTextColor;
 @property (nonatomic, readonly) UIColor* tableTitleTextColor;
-@property (nonatomic, readonly) UIColor* tableHeaderTextColor;
-@property (nonatomic, readonly) UIColor* tableHeaderShadowColor;
-@property (nonatomic, readonly) UIColor* tableHeaderTintColor;
-@property (nonatomic, readonly) UIColor* tableSeparatorColor;
-@property (nonatomic, readonly) UIColor* tablePlainBackgroundColor;
-@property (nonatomic, readonly) UIColor* tableGroupedBackgroundColor;
-@property (nonatomic, readonly) UIColor* searchTableBackgroundColor;
-@property (nonatomic, readonly) UIColor* searchTableSeparatorColor;
 
 @property (nonatomic, readonly) UIColor* tabTintColor;
 @property (nonatomic, readonly) UIColor* tabBarTintColor;
@@ -60,7 +69,6 @@
 
 @property (nonatomic, readonly) UIColor* postButtonColor;
 
-@property (nonatomic, readonly) UIFont* font;
 @property (nonatomic, readonly) UIFont* buttonFont;
 @property (nonatomic, readonly) UIFont* tableFont;
 @property (nonatomic, readonly) UIFont* tableSmallFont;
