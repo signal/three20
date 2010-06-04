@@ -16,7 +16,6 @@
 
 // Style
 #import "Three20Style/TTStyleSheet.h"
-#import "Three20UI/TTActivityLabel.h"
 
 @class TTShape;
 
