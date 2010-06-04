@@ -85,7 +85,6 @@
 @property (nonatomic, readonly) UIFont* activityBannerFont;
 
 @property (nonatomic, readonly) UITableViewCellSelectionStyle tableSelectionStyle;
-@property (nonatomic, readonly) TTActivityLabelStyle activityLabelStyle;
 
 - (TTStyle*)selectionFillStyle:(TTStyle*)next;
 
