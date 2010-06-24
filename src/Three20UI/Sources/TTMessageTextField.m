@@ -53,7 +53,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (TTPickerTextField*)createViewForController:(TTMessageController*)controller {
-  return [[[TTPickerTextField alloc] init] autorelease];
+  TTPickerTextField* field = [[[TTPickerTextField alloc] init] autorelease];
+  field.text = self.text;
+  return field;
 }
 
 
