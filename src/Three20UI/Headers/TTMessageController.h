@@ -49,6 +49,7 @@
 
   BOOL _showsRecipientPicker;
   BOOL _isModified;
+  BOOL _bodyRequired;
 
   id<TTTableViewDataSource>       _dataSource;
   id<TTMessageControllerDelegate> _delegate;
@@ -81,10 +82,16 @@
 @property (nonatomic, retain) NSString* subject;
 
 /**
- * The body of the message. The body is not required for the user to send a
- * message.
+ * The body of the message. The body is required for the user to send a
+ * message unless the bodyRequired is set to NO.
  */
 @property (nonatomic, retain) NSString* body;
+
+/**
+ * Determines whether body content is required to send a message. This is YES
+ * by default.
+ */
+@property (nonatomic) BOOL bodyRequired;
 
 /**
  * Controls whether a contact add button is shown in the views for

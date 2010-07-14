@@ -53,6 +53,7 @@
 @synthesize fields                = _fields;
 @synthesize isModified            = _isModified;
 @synthesize showsRecipientPicker  = _showsRecipientPicker;
+@synthesize bodyRequired          = _bodyRequired;
 @synthesize dataSource            = _dataSource;
 @synthesize delegate              = _delegate;
 
@@ -90,6 +91,7 @@
 - (id)initWithRecipients:(NSArray*)recipients {
   if (self = [self initWithNibName:nil bundle:nil]) {
     _initialRecipients = [recipients retain];
+    _bodyRequired = YES;
   }
 
   return self;
@@ -229,8 +231,12 @@
       }
     }
   }
+  
+  if (self.bodyRequired) {
+    compliant = compliant && _textEditor.text.length;
+  }
 
-  return compliant && _textEditor.text.length;
+  return compliant;
 }
 
 
@@ -357,14 +363,18 @@
   }
 
   if (!_frozenState) {
+    BOOL firstResponderSet = NO;
     for (NSInteger i = 0; i < _fields.count+1; ++i) {
       if (![self fieldHasValueAtIndex:i]) {
         UIView* view = [self viewForFieldAtIndex:i];
         [view becomeFirstResponder];
-        return;
+        firstResponderSet = YES;
+        break;
       }
     }
-    [[self viewForFieldAtIndex:0] becomeFirstResponder];
+    if (!firstResponderSet) {
+      [[self viewForFieldAtIndex:0] becomeFirstResponder];
+    }
   }
 
   [self updateSendCommand];
@@ -463,6 +473,7 @@
     [NSTimer scheduledTimerWithTimeInterval:0 target:self
       selector:@selector(setTitleToSubject) userInfo:nil repeats:NO];
   }
+  [self performSelector:@selector(updateSendCommand) withObject:nil afterDelay:0];
   return YES;
 }
 
